@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Actividades Educativas - Suite Profesional</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #eef2ff;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --bg-gradient: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --radius: 16px;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            padding: 40px 20px;
+        }
+
+        .activity-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 35px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border-color: var(--primary-light);
+        }
+
+        .activity-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .activity-icon {
+            font-size: 4.5em;
+            margin-bottom: 20px;
+            display: block;
+            line-height: 1;
+        }
+
+        .activity-card h2 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .activity-card p {
+            color: var(--text-light);
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .activity-features {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .activity-features li {
+            padding: 8px 0;
+            color: var(--text-light);
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .activity-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 28px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-decoration: none;
+        }
+
+        .activity-button:hover {
+            background: var(--primary-dark);
+            transform: scale(1.02);
+        }
+
+        .activity-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Colores específicos por actividad */
+        .activity-card[data-activity="sopa"] .activity-icon {
+            color: #4f46e5;
+        }
+
+        .activity-card[data-activity="sopa"] .activity-button {
+            background: #4f46e5;
+        }
+
+        .activity-card[data-activity="sopa"] .activity-button:hover {
+            background: #4338ca;
+        }
+
+        .activity-card[data-activity="crucigrama"] .activity-icon {
+            color: #10b981;
+        }
+
+        .activity-card[data-activity="crucigrama"] .activity-button {
+            background: #10b981;
+        }
+
+        .activity-card[data-activity="crucigrama"] .activity-button:hover {
+            background: #059669;
+        }
+
+        .activity-card[data-activity="bingo"] .activity-icon {
+            color: #f59e0b;
+        }
+
+        .activity-card[data-activity="bingo"] .activity-button {
+            background: #f59e0b;
+        }
+
+        .activity-card[data-activity="bingo"] .activity-button:hover {
+            background: #d97706;
+        }
+
+        .activity-card[data-activity="batalla"] .activity-icon {
+            color: #3b82f6;
+        }
+
+        .activity-card[data-activity="batalla"] .activity-button {
+            background: #3b82f6;
+        }
+
+        .activity-card[data-activity="batalla"] .activity-button:hover {
+            background: #2563eb;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        .footer p {
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .footer .version {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .header p {
+                font-size: 1.1em;
+            }
+
+            .activities-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .activity-card {
+                padding: 25px;
+            }
+        }
+
+        /* Animación de entrada */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .activity-card {
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .activity-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .activity-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .activity-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .activity-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Generador de Actividades Educativas</h1>
+            <p>Suite Profesional para Crear Material Didáctico de Calidad</p>
+        </div>
+
+        <div class="activities-grid">
+            <!-- Sopa de Letras -->
+            <div class="activity-card" data-activity="sopa">
+                <span class="activity-icon">🔤</span>
+                <h2>Sopa de Letras</h2>
+                <p>Crea sopas de letras profesionales con diferentes niveles de dificultad. Perfecto para reforzar vocabulario y ortografía.</p>
+                <ul class="activity-features">
+                    <li>Múltiples niveles de dificultad</li>
+                    <li>Generación automática de grillas</li>
+                    <li>Exportación a Word con template</li>
+                    <li>Formato profesional del colegio</li>
+                </ul>
+                <a href="sopa de letras/index.html" class="activity-button">
+                    <span>🚀 Abrir Generador</span>
+                </a>
+            </div>
+
+            <!-- Crucigramas -->
+            <div class="activity-card" data-activity="crucigrama">
+                <span class="activity-icon">✏️</span>
+                <h2>Crucigramas</h2>
+                <p>Genera crucigramas únicos y personalizados con pistas. Ideal para evaluar comprensión y conocimiento.</p>
+                <ul class="activity-features">
+                    <li>Generación automática inteligente</li>
+                    <li>Pistas personalizables</li>
+                    <li>Diseño único por estudiante</li>
+                    <li>Exportación profesional a Word</li>
+                </ul>
+                <a href="crusigramas/index.html" class="activity-button">
+                    <span>🚀 Abrir Generador</span>
+                </a>
+            </div>
+
+            <!-- Bingo Matemático -->
+            <div class="activity-card" data-activity="bingo">
+                <span class="activity-icon">🎲</span>
+                <h2>Bingo Matemático</h2>
+                <p>Sistema completo de bingo educativo con diferentes modos matemáticos. Incluye monitor en tiempo real.</p>
+                <ul class="activity-features">
+                    <li>Múltiples modos (multiplicación, fracciones, etc.)</li>
+                    <li>Monitor en tiempo real</li>
+                    <li>Cartones únicos por estudiante</li>
+                    <li>Exportación a Word profesional</li>
+                </ul>
+                <a href="bingo/Indexv1.html" class="activity-button">
+                    <span>🚀 Abrir Generador</span>
+                </a>
+            </div>
+
+            <!-- Batalla Naval -->
+            <div class="activity-card" data-activity="batalla">
+                <span class="activity-icon">⚓</span>
+                <h2>Batalla Naval en Q</h2>
+                <p>Genera tableros de plano cartesiano para juegos educativos. Perfecto para enseñar coordenadas y números racionales.</p>
+                <ul class="activity-features">
+                    <li>Plano cartesiano completo</li>
+                    <li>Coordenadas decimales y fracciones</li>
+                    <li>Tableros personalizados</li>
+                    <li>Exportación a Word con imágenes</li>
+                </ul>
+                <a href="Batalla Naval en Q/index.html" class="activity-button">
+                    <span>🚀 Abrir Generador</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 - Generador de Actividades Educativas</p>
+            <p class="version">Versión 2.0 - Sistema de Templates Profesional</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,351 @@
+/* Reset y Estilos Generales */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #3498db;
+    --background-color: #f4f6f7;
+    --text-color: #2c3e50;
+    --border-color: #bdc3c7;
+}
+
+* {
+    box-sizing: border-box;
+    /* Asegura que el padding y border no aumenten el tamaño */
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: var(--secondary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Input Section */
+.input-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.primary-btn,
+.secondary-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-bottom: 10px;
+}
+
+.primary-btn {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+}
+
+.primary-btn:hover {
+    background-color: #2980b9;
+}
+
+.secondary-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.secondary-btn:hover {
+    background-color: #2c3e50;
+}
+
+
+/* Estilos de Impresión y Visualización */
+#printArea {
+    display: none;
+}
+
+.puzzle-page {
+    page-break-after: always;
+    padding: 2cm;
+    background: white;
+    max-width: 210mm;
+    margin: 0 auto;
+    position: relative;
+    border: 1px solid #ccc;
+    /* Borde visual suave en pantalla */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    font-family: 'Times New Roman', Times, serif;
+    /* Fuente académica clásica */
+    color: #000;
+}
+
+/* Header tipo examen/taller */
+.puzzle-header {
+    border-bottom: 2px solid #000;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.header-left {
+    flex: 1;
+}
+
+.header-right {
+    flex: 1;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.puzzle-header h1 {
+    font-size: 24pt;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.puzzle-header .institution-name {
+    font-size: 14pt;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.puzzle-header p {
+    margin: 5px 0 0;
+    font-style: italic;
+    font-size: 11pt;
+}
+
+.student-info-box {
+    border: none;
+    padding: 5px 10px;
+    font-size: 11pt;
+    min-width: 250px;
+    text-align: left;
+}
+
+.info-line {
+    margin-bottom: 5px;
+}
+
+.info-line:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* Grid del Crucigrama */
+.puzzle-grid-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.crossword-grid {
+    display: grid;
+    /* grid-template-columns set via JS */
+    gap: -1px;
+    /* Superponer bordes para que sean finos */
+    border: 2px solid #000;
+    /* Borde exterior más grueso */
+    background: transparent;
+}
+
+.grid-cell {
+    background: white;
+    width: 32px;
+    /* Ligeramente más grande */
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    position: relative;
+    font-weight: bold;
+    color: #000;
+    border: 1px solid #000;
+    margin-right: -1px;
+    /* Truco para bordes colapsados */
+    margin-bottom: -1px;
+}
+
+/* Celdas vacías (Negras/Transparentes) */
+.grid-cell.black {
+    background: #000 !important;
+    /* Relleno negro sólido para estilo clásico */
+    border: 1px solid #000;
+}
+
+/* Opcional: Estilo "Skeleton" (sin relleno negro, solo contorno opaco) 
+   Si prefieres el estilo anterior donde solo se veían las letras */
+/* 
+.grid-cell.black {
+    background: transparent !important;
+    border: none !important;
+}
+.crossword-grid {
+    border: none;
+    gap: 0;
+}
+*/
+
+/* Preferimos estilo Clásico (Celdas negras sólidas o patrón) para "Profesional".
+   Pero el usuario tenía un estilo "skeleton" (solo las palabras). 
+   Vamos a mantener el estilo "skeleton" pero más limpio. */
+
+.crossword-grid.skeleton {
+    border: none;
+    gap: 0;
+}
+
+.crossword-grid.skeleton .grid-cell {
+    border: 1px solid #000;
+    margin: 0;
+}
+
+.crossword-grid.skeleton .grid-cell.black {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+}
+
+
+.cell-number {
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    font-size: 11px;
+    line-height: 1;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+}
+
+/* Pistas */
+.clues-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    font-size: 11pt;
+    margin-top: 20px;
+}
+
+.clue-section h3 {
+    border-bottom: 1px solid #000;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    font-size: 12pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #000;
+}
+
+.clue-list {
+    list-style: none;
+    padding: 0;
+}
+
+.clue-list li {
+    margin-bottom: 6px;
+    page-break-inside: avoid;
+    padding-left: 20px;
+    /* Sangría francesa */
+    text-indent: -20px;
+}
+
+/* Media Query para Impresión */
+@media print {
+    @page {
+        size: letter;
+        /* Carta */
+        margin: 1.5cm;
+        /* Margen de impresión */
+    }
+
+    body {
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    #printArea {
+        display: block !important;
+    }
+
+    .puzzle-page {
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: none;
+        page-break-after: always;
+    }
+
+    .puzzle-page:last-child {
+        page-break-after: auto;
+    }
+}

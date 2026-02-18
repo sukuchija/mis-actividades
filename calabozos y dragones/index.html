@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dungeon Master Pro: Chronicles of Math</title>
+    <style>
+        :root {
+            --bg: #1a1a1d;
+            --panel: #2d2d30;
+            --text: #e0e0e0;
+            --accent: #ffd700;
+            /* Gold bright */
+            --accent-hover: #e5c100;
+            --danger: #ff4444;
+            --success: #00C851;
+            --map-paper: #f4e4bc;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-fantasy: 'Georgia', serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- LAYOUT --- */
+        #control-panel {
+            width: 50%;
+            padding: 20px;
+            border-right: 2px solid #555;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.6);
+        }
+
+        #maps-panel {
+            width: 50%;
+            padding: 20px;
+            background: #121212;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            align-content: start;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--font-fantasy);
+            color: var(--accent);
+            text-shadow: 2px 2px 4px black;
+        }
+
+        #story-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* --- TARJETAS DE GRUPO --- */
+        .group-story-card {
+            background: #36363a;
+            border: 1px solid #555;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .group-header {
+            background: #202022;
+            padding: 12px 15px;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-fantasy);
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--accent);
+        }
+
+        .story-content-area {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .story-text {
+            font-size: 1.05em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* --- DESAFÍOS --- */
+        .challenge-card {
+            background: #fff8e1;
+            color: #3e2723;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 5px solid #ff6f00;
+            font-family: 'Times New Roman', serif;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .challenge-header {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #d84315;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            border-bottom: 1px solid #d84315;
+        }
+
+        .gm-note {
+            background: #252526;
+            border: 1px solid #444;
+            color: #b0aec5;
+            font-size: 0.9em;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* --- BOTONES --- */
+        .choices {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #d4af37 0%, #b5952f 100%);
+            color: #1a1a1d;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* --- MAP SYSTEM --- */
+        .group-map-container {
+            background: var(--map-paper);
+            padding: 10px;
+            border-radius: 4px;
+            border: 6px solid #4e342e;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            background: #d7ccc8;
+            border: 2px solid #3e2723;
+            position: relative;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            border: 1px solid rgba(62, 39, 35, 0.2);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4em;
+        }
+
+        /* PLAYER TOKEN */
+        .player-token {
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            background: radial-gradient(circle, #ff0000 30%, #990000 90%);
+            border: 2px solid white;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 10px gold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+            }
+        }
+
+        .coord-label {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.6em;
+            color: rgba(0, 0, 0, 0.5);
+            font-family: monospace;
+        }
+
+        /* BIOMES */
+        .biome-forest {
+            background: #a5d6a7;
+            color: #1b5e20;
+        }
+
+        .biome-desert {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        .biome-water {
+            background: #90caf9;
+            color: #0d47a1;
+        }
+
+        .biome-mountain {
+            background: #cfd8dc;
+            color: #37474f;
+        }
+
+        .biome-castle {
+            background: #bcaaa4;
+            color: #3e2723;
+        }
+
+        .biome-start {
+            background: #fff59d;
+        }
+
+        /* Lighter yellow */
+        .biome-end {
+            background: #e1bee7;
+        }
+
+        @media print {
+            #control-panel {
+                display: none;
+            }
+
+            #maps-panel {
+                display: block;
+            }
+
+            .group-map-container {
+                display: inline-block;
+                width: 45%;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="control-panel">
+        <a href="../index.html"
+            style="display:block; margin-bottom: 10px; color: #ffd700; text-decoration: none; font-weight: bold;">⬅
+            Volver al Menú</a>
+        <h1>🛡️ Dungeon Master Pro</h1>
+        <div id="setup-screen">
+            <h3>Preparación de la Partida</h3>
+            <p>Selecciona el número de grupos de estudiantes.</p>
+            <label>Grupos: <input type="number" id="numGroups" value="4" min="1" max="4"
+                    style="padding:5px; width:50px; text-align:center;"></label>
+            <br><br>
+            <button onclick="startGame()">⚔️ Iniciar Aventura</button>
+        </div>
+        <div id="story-grid"></div>
+    </div>
+
+    <div id="maps-panel"></div>
+
+    <!-- CARGA DE DATOS EXTERNOS -->
+    <script src="gamedata.js"></script>
+
+    <script>
+        // --- LOGIC ENGINE ---
+        // (La variable 'gameData' se carga desde gamedata.js)
+
+        // --- STATE MANAGEMENT ---
+        let groupStates = {};
+
+        function startGame() {
+            const numGroups = document.getElementById('numGroups').value;
+            const storyGrid = document.getElementById('story-grid');
+            const mapsPanel = document.getElementById('maps-panel');
+
+            // Reset
+            storyGrid.innerHTML = '';
+            mapsPanel.innerHTML = '';
+            groupStates = {};
+
+            document.getElementById('setup-screen').style.display = 'none';
+
+            for (let i = 1; i <= numGroups; i++) {
+                // Initialize State
+                groupStates[i] = {
+                    currentNode: 'start',
+                    hp: 5,
+                    mapId: `map-g${i}`
+                };
+
+                // Create UI Component
+                createGroupCard(i, storyGrid);
+                createGroupMap(i, mapsPanel);
+
+                // Initial Load
+                loadStoryNode(i, 'start');
+            }
+        }
+
+        function createGroupCard(id, container) {
+            const card = document.createElement('div');
+            card.className = 'group-story-card';
+            card.innerHTML = `
+                <div class="group-header">
+                    <span>GRUPO ${id}</span>
+                    <span id="hp-${id}">❤️❤️❤️❤️❤️</span>
+                </div>
+                <div id="content-${id}" class="story-content-area"></div>
+            `;
+            container.appendChild(card);
+        }
+
+        function createGroupMap(id, container) {
+            const mapContainer = document.createElement('div');
+            mapContainer.className = 'group-map-container';
+            mapContainer.innerHTML = `<div class="map-title" style="text-align:center; font-weight:bold; margin-bottom:5px;">MAPA G${id}</div>`;
+
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            grid.id = `map-grid-${id}`;
+
+            const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+            // Generate 6x6 Grid
+            for (let r = 0; r < 6; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const cell = document.createElement('div');
+                    // Procedural Biomes
+                    const biomeKeys = Object.keys(gameData.biomes);
+                    const randomKey = biomeKeys[Math.floor(Math.random() * biomeKeys.length)];
+                    const biome = gameData.biomes[randomKey];
+
+                    let finalBiome = biome.color;
+                    let icon = biome.icon;
+
+                    // Fixed Start/End
+                    if (r === 0 && c === 0) { finalBiome = 'biome-start'; icon = '🚩'; }
+                    if (r === 5 && c === 5) { finalBiome = 'biome-end'; icon = '👑'; }
+
+                    cell.className = `cell ${finalBiome}`;
+                    cell.dataset.coord = `${cols[r]}${c + 1}`; // e.g., A1, B2
+                    cell.innerHTML = `
+                        <span class="coord-label">${cols[r]}${c + 1}</span>
+                        <span style="opacity:0.6;">${icon}</span>
+                    `;
+                    grid.appendChild(cell);
+                }
+            }
+            mapContainer.appendChild(grid);
+            container.appendChild(mapContainer);
+        }
+
+        function loadStoryNode(groupId, nodeId) {
+            const node = gameData.story[nodeId];
+            const contentDiv = document.getElementById(`content-${groupId}`);
+
+            if (!node) return;
+
+            // 1. Update State
+            groupStates[groupId].currentNode = nodeId;
+
+            // 2. Map Action (Visual Movement)
+            if (node.mapAction) {
+                movePlayerToken(groupId, node.mapAction);
+            }
+
+            // 3. Render Text
+            let html = `<div class="story-text">${node.text}</div>`;
+
+            // 4. Render Challenge
+            if (node.question) {
+                html += `
+                    <div class="challenge-card">
+                        <span class="challenge-header">⚔️ Desafío Matemático</span>
+                        <div style="font-style:italic; margin-bottom:8px;">${node.question.context}</div>
+                        <div style="font-weight:bold; margin-bottom:10px;">${node.question.prompt}</div>
+                        ${node.question.options.map(o => `<div style="padding:4px; border-bottom:1px dashed #ccc;">${o}</div>`).join('')}
+                    </div>
+                `;
+            }
+
+            // 5. GM Notes
+            if (node.gm_note) {
+                const answerTxt = node.question ? `<br><strong>Respuesta:</strong> ${node.question.answer}` : '';
+                html += `<div class="gm-note">👁️ <strong>GM:</strong> ${node.gm_note}${answerTxt}</div>`;
+            }
+
+            // 6. Options
+            html += `<div class="choices">`;
+            node.options.forEach(opt => {
+                html += `<button onclick="loadStoryNode(${groupId}, '${opt.target}')">${opt.text}</button>`;
+            });
+            html += `</div>`;
+
+            contentDiv.innerHTML = html;
+        }
+
+        function movePlayerToken(groupId, coord) {
+            const grid = document.getElementById(`map-grid-${groupId}`);
+            // Remove old token
+            const oldToken = grid.querySelector('.player-token');
+            if (oldToken) oldToken.remove();
+
+            // Find target cell
+            // We need to look through children or use querySelector with attribute
+            const targetCell = Array.from(grid.children).find(cell => cell.dataset.coord === coord);
+
+            if (targetCell) {
+                const token = document.createElement('div');
+                token.className = 'player-token';
+                targetCell.appendChild(token);
+
+                // Highlight effect
+                targetCell.style.borderColor = 'gold';
+                targetCell.style.zIndex = '5';
+                setTimeout(() => { targetCell.style.borderColor = 'rgba(62,39,35,0.2)'; }, 2000);
+            }
+        }
+
+    </script>
+</body>
+
+</html>

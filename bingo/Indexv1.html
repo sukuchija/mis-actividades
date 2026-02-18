@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bingo Matemático - Master Suite</title>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #f4f6f8;
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: 1px solid #e1e4e8;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #1e293b;
+            margin-top: 0;
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #3a56d4;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #d90429;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #cbd5e1;
+            color: #64748b;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: none;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #475569;
+        }
+
+        /* --- VISTAS --- */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- LOBBY (LISTA DE JUEGOS) --- */
+        .game-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .game-item {
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        .game-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #475569;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- JUEGO --- */
+        .operation-box {
+            background: #1e293b;
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(30, 41, 59, 0.2);
+        }
+
+        .big-op {
+            font-size: 4.5em;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .sub-op {
+            color: #94a3b8;
+            font-size: 1.1em;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .mini-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .mini-card.winner {
+            border: 2px solid #10b981;
+            background: #ecfdf5;
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            margin-top: 8px;
+        }
+
+        .mini-cell {
+            background: #f8fafc;
+            text-align: center;
+            font-size: 10px;
+            padding: 4px 0;
+            border-radius: 4px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .mini-cell.marked {
+            background: #f59e0b;
+            color: white;
+            font-weight: bold;
+            box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .badge-fractions {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .badge-multiplication {
+            background: #ddd6fe;
+            color: #7c3aed;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="../index.html"
+        style="position: fixed; top: 10px; left: 10px; z-index: 9999; text-decoration: none; padding: 8px 15px; background: white; color: #333; border-radius: 20px; font-weight: bold; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">⬅
+        Volver</a>
+    <div class="container">
+
+        <div id="view-lobby" class="view-section active">
+            <div class="card">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;">
+                    <div>
+                        <h1 style="margin:0;">📂 Mis Clases</h1>
+                        <p style="margin:5px 0 0 0; color:#64748b;">Gestiona tus bingos y actividades</p>
+                    </div>
+                    <div style="display:flex; gap: 10px;">
+                        <button class="btn-outline" onclick="document.getElementById('importInput').click()">📥 Importar
+                            Backup</button>
+                        <button class="btn-outline" onclick="exportData()">💾 Guardar Backup</button>
+                        <button class="btn-primary" onclick="showCreator()">+ Nueva Actividad</button>
+                    </div>
+                    <input type="file" id="importInput" style="display:none" onchange="importData(this)" accept=".json">
+                </div>
+
+                <div id="gamesContainer" class="game-list">
+                    <!-- Lista inyectada por JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="view-creator" class="view-section">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">🛠️ Configurar Nuevo Bingo</h2>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label>Nombre de la Clase / Grupo</label>
+                        <input type="text" id="newGameName" placeholder="Ej: Séptimo B - Mañana" autocomplete="off">
+                    </div>
+                    <div>
+                        <label>Institución (para el PDF)</label>
+                        <input type="text" id="institutionName" placeholder="Ej: Instituto Educativo..."
+                            value="INSTITUCIÓN EDUCATIVA">
+                    </div>
+                </div>
+
+                <label>Modo de Juego</label>
+                <select id="newGameMode" onchange="toggleWordInput()">
+                    <option value="multiplication">✖️ Multiplicación (Tablas 2-12)</option>
+                    <option value="fractions">⅒ Fracciones (Simplificar y Operaciones)</option>
+                    <option value="division">➗ División Exacta (Resultado 1-12)</option>
+                    <option value="sum_sub">➕➖ Suma y Resta (1-50)</option>
+                    <option value="mixed">🧠 Mixto (Mult, Div, Suma, Resta)</option>
+                    <option value="english">🇬🇧 Inglés / Palabras (Lista Personalizada)</option>
+                </select>
+
+                <div id="wordInputContainer" style="display:none; margin-top: 15px;">
+                    <label>Lista de Palabras (Mínimo 25 palabras para evitar repetidos)</label>
+                    <textarea id="wordListInput" style="height: 150px;"
+                        placeholder="Apple&#10;Banana&#10;Cat&#10;Dog&#10;..."></textarea>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                        * Ingresa una palabra por línea. Se seleccionarán 25 aleatorias para cada cartón.
+                    </p>
+                </div>
+
+                <label>Estudiantes (Copiar y pegar lista, uno por línea)</label>
+                <textarea id="studentList" style="height: 200px;"
+                    placeholder="Juan Pérez&#10;Maria Gonzalez&#10;Pedro Ruiz"></textarea>
+
+                <div style="display:flex; gap:10px; margin-top: 10px;">
+                    <button class="btn-success" onclick="createGame()">✅ Crear y Guardar</button>
+                    <button class="btn-outline" onclick="showLobby()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-game" class="view-section">
+            <div class="card">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+                    <div style="display:flex; align-items:center; gap: 15px;">
+                        <button class="btn-outline" onclick="showLobby()" style="padding: 8px 12px;">⬅ Volver</button>
+                        <div>
+                            <h2 id="gameTitleDisplay" style="margin:0; font-size: 1.5em;">Juego en Curso</h2>
+                            <span id="gameModeBadge" class="tag" style="margin-top:5px;">Modo</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary" style="background-color: #f59e0b;" onclick="exportToWord()">📄 Descargar
+                        Cartones (Word)</button>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #475569;">Documento
+                        Template (Opcional):</label>
+                    <p style="margin-bottom: 10px; color: #666; font-size: 0.9em;">Selecciona el documento template con
+                        el formato del colegio. <strong>Si no seleccionas uno, se generará un documento básico.</strong>
+                    </p>
+                    <input type="file" id="templateFile" accept=".docx"
+                        style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                    <div>
+                        <span id="templateStatus"
+                            style="padding: 6px 12px; background: #f0f0f0; border-radius: 4px; font-size: 0.9em;">No se
+                            ha seleccionado template (Se usará diseño básico)</span>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div id="currentOpDisplay" class="big-op">?</div>
+                    <div id="lastResultDisplay" class="sub-op">Pulsa el botón "Siguiente" para comenzar</div>
+                </div>
+
+                <button class="btn-success"
+                    style="width:100%; font-size:1.3em; padding:20px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);"
+                    onclick="drawNumber()">
+                    🎲 Generar Siguiente Operación
+                </button>
+            </div>
+
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <h3>📡 Monitor en Tiempo Real</h3>
+                    <span style="font-size: 0.9em; color: #64748b;">Se actualiza automáticamente al jugar</span>
+                </div>
+                <div id="teacherDashboard" class="dashboard-grid"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- GESTIÓN DE DATOS (DATABASE) ---
+        const DB_KEY = 'bingo_master_db_v1';
+        let currentGame = null;
+
+        // Fracciones comunes para el modo Fracciones
+        const COMMON_FRACTIONS = [
+            { n: 1, d: 2 }, { n: 1, d: 3 }, { n: 2, d: 3 }, { n: 1, d: 4 }, { n: 3, d: 4 },
+            { n: 1, d: 5 }, { n: 2, d: 5 }, { n: 3, d: 5 }, { n: 4, d: 5 },
+            { n: 1, d: 6 }, { n: 5, d: 6 }, { n: 1, d: 8 }, { n: 3, d: 8 }, { n: 5, d: 8 }, { n: 7, d: 8 },
+            { n: 1, d: 10 }, { n: 3, d: 10 }, { n: 7, d: 10 }, { n: 9, d: 10 }
+        ];
+
+        function getDB() {
+            const raw = localStorage.getItem(DB_KEY);
+            return raw ? JSON.parse(raw) : {};
+        }
+
+        function saveDB(db) {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
+
+        // --- UTILS ---
+        function gcd(a, b) { return b == 0 ? a : gcd(b, a % b); }
+        function simplifyFrac(n, d) {
+            const divisor = gcd(n, d);
+            return { n: n / divisor, d: d / divisor };
+        }
+        function fracToString(f) { return `${f.n}/${f.d}`; }
+
+        // --- NAVEGACIÓN ---
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function showLobby() {
+            currentGame = null;
+            renderGameList();
+            switchView('view-lobby');
+        }
+
+        function showCreator() {
+            document.getElementById('newGameName').value = '';
+            document.getElementById('studentList').value = '';
+            // No reseteamos institutionName para comodidad
+            switchView('view-creator');
+        }
+
+        function toggleWordInput() {
+            const mode = document.getElementById('newGameMode').value;
+            const container = document.getElementById('wordInputContainer');
+            if (mode === 'english') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // --- LÓGICA DEL LOBBY ---
+        function renderGameList() {
+            const db = getDB();
+            const container = document.getElementById('gamesContainer');
+            container.innerHTML = '';
+
+            const ids = Object.keys(db).sort((a, b) => db[b].timestamp - db[a].timestamp);
+
+            if (ids.length === 0) {
+                container.innerHTML = `
+                <div style="text-align:center; grid-column: 1/-1; padding: 40px; color: #94a3b8;">
+                    <div style="font-size: 3em; margin-bottom: 20px;">📭</div>
+                    <p>No tienes actividades guardadas todavía.</p>
+                    <button class="btn-primary" onclick="showCreator()">Crear la primera</button>
+                </div>
+            `;
+                return;
+            }
+
+            ids.forEach(id => {
+                const game = db[id];
+                const date = new Date(game.timestamp).toLocaleDateString();
+
+                let modeLabel = "Desconocido";
+                let modeClass = "";
+                switch (game.mode) {
+                    case 'multiplication': modeLabel = "Multiplicación"; modeClass = "badge-multiplication"; break;
+                    case 'fractions': modeLabel = "Fracciones"; modeClass = "badge-fractions"; break;
+                    case 'division': modeLabel = "División"; break;
+                    case 'sum_sub': modeLabel = "Suma/Resta"; break;
+                    case 'mixed': modeLabel = "Mixto"; break;
+                    case 'english': modeLabel = "Inglés / Palabras"; modeClass = "badge-fractions"; break;
+                }
+
+                const div = document.createElement('div');
+                div.className = 'game-item';
+                div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <span class="tag ${modeClass}">${modeLabel}</span>
+                    <button class="btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteGame('${id}')">✕</button>
+                </div>
+                <h3 style="margin:15px 0 5px 0; font-size: 1.2em;">${game.name}</h3>
+                <p style="font-size:0.85em; color:#64748b; margin-bottom: 15px;">
+                    📅 ${date}<br>
+                    🎓 ${game.students.length} Estudiantes<br>
+                    🏫 ${game.institution || 'N/A'}
+                </p>
+                <button class="btn-primary" style="width:100%;" onclick="loadGame('${id}')">▶ Jugar / Retomar</button>
+            `;
+                container.appendChild(div);
+            });
+        }
+
+        function deleteGame(id) {
+            if (confirm("¿Seguro que quieres borrar esta actividad permanentemente?")) {
+                const db = getDB();
+                delete db[id];
+                saveDB(db);
+                renderGameList();
+            }
+        }
+
+        // --- IMPORTAR / EXPORTAR DATOS ---
+        function exportData() {
+            const db = getDB();
+            // Verificar si hay datos
+            if (Object.keys(db).length === 0) {
+                alert("No hay actividades guardadas para exportar.");
+                return;
+            }
+
+            try {
+                const json = JSON.stringify(db, null, 2);
+                const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+
+                // Nombre del archivo con fecha
+                const date = new Date();
+                const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+                saveAs(blob, `bingo_backup_${dateStr}.json`);
+            } catch (error) {
+                console.error("Error al exportar:", error);
+                alert("Error al generar el archivo de respaldo.");
+            }
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (!confirm("⚠️ ATENCIÓN: Al importar un archivo, se REEMPLAZARÁN todas las actividades actuales con las del archivo.\n\n¿Estás seguro de que quieres continuar?")) {
+                input.value = ''; // Resetear input
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const content = e.target.result;
+                    const newDB = JSON.parse(content);
+
+                    // Validación básica
+                    if (typeof newDB !== 'object' || newDB === null) {
+                        throw new Error("Formato inválido");
+                    }
+
+                    saveDB(newDB);
+                    alert("✅ Datos importados correctamente.");
+                    renderGameList();
+                } catch (error) {
+                    console.error("Error al importar:", error);
+                    alert("Error: El archivo seleccionado no es válido o está dañado.");
+                }
+                input.value = ''; // Resetear para permitir importar el mismo archivo de nuevo si se desea
+            };
+            reader.readAsText(file);
+        }
+
+        // --- LÓGICA DE CREACIÓN ---
+        function createGame() {
+            const name = document.getElementById('newGameName').value.trim();
+            const institution = document.getElementById('institutionName').value.trim() || "";
+            const mode = document.getElementById('newGameMode').value;
+            const rawStudents = document.getElementById('studentList').value.trim();
+
+            if (!name || !rawStudents) return alert("Por favor completa el nombre de la clase y la lista de estudiantes.");
+
+            // MEJORA: Parseo multi-formato
+            let studentNames = [];
+            // Intentamos detectar si hay saltos de línea
+            if (rawStudents.includes('\n')) {
+                studentNames = rawStudents.split(/\r?\n/);
+            } else if (rawStudents.includes(',')) {
+                // Fallback: comas
+                studentNames = rawStudents.split(',');
+            } else {
+                // Fallback: un solo nombre
+                studentNames = [rawStudents];
+            }
+
+            // Limpieza final
+            studentNames = studentNames.map(n => n.trim()).filter(n => n.length > 0);
+
+            if (studentNames.length === 0) return alert("No se detectaron estudiantes válidos.");
+
+            // VALIDACIÓN MODO INGLÉS
+            let wordPool = [];
+            if (mode === 'english') {
+                const rawWords = document.getElementById('wordListInput').value.trim();
+                if (!rawWords) return alert("Por favor ingresa la lista de palabras para el bingo.");
+
+                wordPool = rawWords.split(/\r?\n/).map(w => w.trim()).filter(w => w.length > 0);
+
+                // Eliminar duplicados en el pool para asegurar variedad
+                wordPool = [...new Set(wordPool)];
+
+                if (wordPool.length < 24) {
+                    return alert(`Necesitas al menos 25 palabras únicas para generar cartones variados. Solo detectamos ${wordPool.length}.`);
+                }
+            }
+
+            const id = 'game_' + Date.now();
+
+            const studentsData = studentNames.map(sName => {
+                return {
+                    name: sName, // Ya está trimmeado
+                    card: generateCardNumbers(mode, wordPool),
+                    marks: new Array(25).fill(false)
+                };
+            });
+
+            const newGame = {
+                id: id,
+                name: name,
+                institution: institution,
+                mode: mode,
+                wordPool: wordPool,
+                timestamp: Date.now(),
+                students: studentsData,
+                drawnNumbers: [],
+                lastOpText: "Pulse 'Generar' para iniciar",
+                lastResText: ""
+            };
+
+            const db = getDB();
+            db[id] = newGame;
+            saveDB(db);
+
+            loadGame(id);
+        }
+
+        // --- MOTOR MATEMÁTICO & PALABRAS ---
+        function generateCardNumbers(mode, wordPool = []) {
+            const numbers = new Set();
+            let attempts = 0;
+
+            if (mode === 'english') {
+                // Seleccionar 25 palabras aleatorias del pool sin repetir en el mismo cartón
+                const shuffled = [...wordPool].sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, 25);
+            }
+
+            while (numbers.size < 25 && attempts < 1000) {
+                attempts++;
+                let num;
+                if (mode === 'multiplication') {
+                    num = (Math.floor(Math.random() * 11) + 2) * (Math.floor(Math.random() * 11) + 2);
+                    numbers.add(num.toString());
+                } else if (mode === 'fractions') {
+                    const f = COMMON_FRACTIONS[Math.floor(Math.random() * COMMON_FRACTIONS.length)];
+                    numbers.add(fracToString(f));
+                } else if (mode === 'division') {
+                    num = Math.floor(Math.random() * 12) + 1;
+                    numbers.add(num.toString());
+                } else if (mode === 'sum_sub') {
+                    num = Math.floor(Math.random() * 50) + 1;
+                    numbers.add(num.toString());
+                } else if (mode === 'mixed') {
+                    num = Math.floor(Math.random() * 100) + 1;
+                    numbers.add(num.toString());
+                }
+            }
+
+            // CORRECCIÓN: Rellenar con duplicados si no hay 25 números únicos
+            let result = Array.from(numbers);
+            while (result.length < 25) {
+                if (mode === 'fractions') {
+                    const f = COMMON_FRACTIONS[Math.floor(Math.random() * COMMON_FRACTIONS.length)];
+                    result.push(fracToString(f));
+                } else {
+                    result.push((Math.floor(Math.random() * 50) + 1).toString());
+                }
+            }
+
+            // Mezclar resultado final para que no queden ordenados
+            result.sort(() => 0.5 - Math.random());
+
+            return result;
+        }
+
+        function generateOperation(mode, drawnHistory) {
+
+            // MODO INGLÉS
+            if (mode === 'english') {
+                const pool = currentGame.wordPool || [];
+                const available = pool.filter(w => !drawnHistory.includes(w));
+
+                if (available.length === 0) {
+                    return { text: "¡Fin del Juego! (Todas las palabras han salido)", value: "END" };
+                }
+
+                const selected = available[Math.floor(Math.random() * available.length)];
+                return { text: selected, value: selected };
+            }
+
+            let opText = "";
+            let resultKey = "";
+            let valid = false;
+            let attempts = 0;
+
+            while (!valid && attempts < 200) {
+                attempts++;
+
+                // Sub-lógica para mixto
+                let currentType = mode;
+                if (mode === 'mixed') {
+                    const types = ['multiplication', 'division', 'sum_sub'];
+                    currentType = types[Math.floor(Math.random() * types.length)];
+                }
+
+                let resultVal; // Valor numérico para comparación interna (si aplica)
+
+                if (currentType === 'multiplication') {
+                    let a = Math.floor(Math.random() * 11) + 2;
+                    let b = Math.floor(Math.random() * 11) + 2;
+                    resultVal = a * b;
+                    resultKey = resultVal.toString();
+                    opText = `${a} × ${b}`;
+                }
+                else if (currentType === 'fractions') {
+                    // Seleccionar objetivo
+                    const target = COMMON_FRACTIONS[Math.floor(Math.random() * COMMON_FRACTIONS.length)];
+                    resultKey = fracToString(target);
+
+                    // Generar operación visual
+                    const opType = Math.random();
+                    if (opType < 0.4) { // Suma simple
+                        let mult = 2; // Amplificar para facilitar partición
+                        let totalN = target.n * mult;
+                        let subN = Math.floor(Math.random() * (totalN - 1)) + 1;
+
+                        let f1 = simplifyFrac(subN, target.d * mult);
+                        let f2 = simplifyFrac(totalN - subN, target.d * mult);
+                        // A veces simplificar demasiado complica, pero es matemáticamente correcto
+                        opText = `${fracToString(f1)} + ${fracToString(f2)}`;
+                    } else if (opType < 0.7) { // Resta
+                        let added = Math.floor(Math.random() * 2) + 1;
+                        let fBig = simplifyFrac(target.n + added, target.d);
+                        let fSub = simplifyFrac(added, target.d);
+                        opText = `${fracToString(fBig)} - ${fracToString(fSub)}`;
+                    } else { // Simplificación directa
+                        let mult = Math.floor(Math.random() * 3) + 2;
+                        opText = `Simplifica: ${target.n * mult}/${target.d * mult}`;
+                    }
+                }
+                else if (currentType === 'division') {
+                    let res = Math.floor(Math.random() * 12) + 1;
+                    let div = Math.floor(Math.random() * 9) + 2;
+                    let dividend = res * div;
+                    resultKey = res.toString();
+                    opText = `${dividend} ÷ ${div}`;
+                }
+                else if (currentType === 'sum_sub') {
+                    if (Math.random() > 0.5) {
+                        let a = Math.floor(Math.random() * 25) + 1;
+                        let b = Math.floor(Math.random() * 25) + 1;
+                        resultVal = a + b;
+                        opText = `${a} + ${b}`;
+                    } else {
+                        let a = Math.floor(Math.random() * 30) + 20;
+                        let b = Math.floor(Math.random() * 19) + 1;
+                        resultVal = a - b;
+                        opText = `${a} - ${b}`;
+                    }
+                    resultKey = resultVal.toString();
+                }
+
+                if (!drawnHistory.includes(resultKey)) {
+                    valid = true;
+                }
+            }
+
+            return { text: opText, value: resultKey };
+        }
+
+
+        // --- JUEGO EN CURSO ---
+        function loadGame(id) {
+            const db = getDB();
+            currentGame = db[id];
+
+            document.getElementById('gameTitleDisplay').innerText = currentGame.name;
+            document.getElementById('gameModeBadge').innerText = currentGame.mode.toUpperCase();
+            document.getElementById('currentOpDisplay').innerText = currentGame.lastOpText || "?";
+            document.getElementById('lastResultDisplay').innerText = currentGame.lastResText || "Listo para jugar";
+
+            // Actualizar clase del badge
+            let modeClass = "tag";
+            if (currentGame.mode === 'fractions') modeClass += " badge-fractions";
+            else if (currentGame.mode === 'multiplication') modeClass += " badge-multiplication";
+            else if (currentGame.mode === 'english') modeClass += " badge-fractions";
+            document.getElementById('gameModeBadge').className = modeClass;
+
+            renderDashboard();
+            switchView('view-game');
+        }
+
+        // Actualizar estado del template cuando se selecciona un archivo
+        document.addEventListener('DOMContentLoaded', function () {
+            const templateFileInput = document.getElementById('templateFile');
+            if (templateFileInput) {
+                templateFileInput.addEventListener('change', function () {
+                    const statusBadge = document.getElementById('templateStatus');
+                    if (this.files && this.files.length > 0) {
+                        statusBadge.textContent = `Template seleccionado: ${this.files[0].name}`;
+                        statusBadge.style.background = '#4caf50';
+                        statusBadge.style.color = 'white';
+                    } else {
+                        statusBadge.textContent = 'No se ha seleccionado template (Se usará diseño básico)';
+                        statusBadge.style.background = '#f0f0f0';
+                        statusBadge.style.color = '#333';
+                    }
+                });
+            }
+        });
+
+        function drawNumber() {
+            if (!currentGame) return;
+
+            const op = generateOperation(currentGame.mode, currentGame.drawnNumbers);
+            if (op.value === "END") {
+                alert("¡Juego Terminado! Se han dicho todas las palabras.");
+                return;
+            }
+
+            currentGame.drawnNumbers.push(op.value);
+            currentGame.lastOpText = op.text;
+            currentGame.lastResText = `Resultado: ${op.value} (Historial: ${currentGame.drawnNumbers.length})`;
+
+            document.getElementById('currentOpDisplay').innerText = op.text;
+            document.getElementById('lastResultDisplay').innerText = `Resultado anterior: ${op.value}`;
+
+            // Marcar estudiantes
+            currentGame.students.forEach(std => {
+                std.card.forEach((num, idx) => {
+                    // Comparación estricta de strings
+                    if (num === op.value) std.marks[idx] = true;
+                });
+            });
+
+            // Guardar estado
+            const db = getDB();
+            db[currentGame.id] = currentGame;
+            saveDB(db);
+
+            renderDashboard();
+        }
+
+        function checkBingo(marks) {
+            // Filas
+            for (let i = 0; i < 5; i++) if (marks.slice(i * 5, i * 5 + 5).every(m => m)) return true;
+            // Columnas
+            for (let i = 0; i < 5; i++) {
+                let col = [marks[i], marks[i + 5], marks[i + 10], marks[i + 15], marks[i + 20]];
+                if (col.every(m => m)) return true;
+            }
+            // Diagonales (Bingo Completo)
+            if ([0, 6, 12, 18, 24].every(i => marks[i])) return true;
+            if ([4, 8, 12, 16, 20].every(i => marks[i])) return true;
+
+            return false;
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('teacherDashboard');
+            container.innerHTML = '';
+
+            const sortedStudents = [...currentGame.students].sort((a, b) => {
+                return (checkBingo(b.marks) ? 1 : 0) - (checkBingo(a.marks) ? 1 : 0);
+            });
+
+            sortedStudents.forEach(student => {
+                const isWinner = checkBingo(student.marks);
+                const div = document.createElement('div');
+                div.className = `mini-card ${isWinner ? 'winner' : ''}`;
+
+                let grid = '<div class="mini-grid">';
+                student.card.forEach((n, i) => {
+                    const content = n.length > 4 ? n.substring(0, 4) + '..' : n;
+                    grid += `<div class="mini-cell ${student.marks[i] ? 'marked' : ''}" title="${n}">${content}</div>`;
+                });
+                grid += '</div>';
+
+                div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; font-size:1.1em; margin-bottom:5px;">
+                    <strong>${student.name}</strong>
+                    ${isWinner ? '<span>🏆</span>' : ''}
+                </div>
+                ${grid}
+            `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- EXPORTAR A WORD PROFESIONAL ---
+        async function exportToWord() {
+            if (!currentGame) return;
+
+            // 1. CHEQUEO: ¿Hay Template?
+            const templateFileInput = document.getElementById('templateFile');
+            if (!templateFileInput.files || templateFileInput.files.length === 0) {
+                // FALLBACK: Usar generación desde cero
+                if (confirm("No has seleccionado un template. ¿Deseas generar un documento con diseño básico?")) {
+                    exportToWordFromScratch();
+                }
+                return;
+            }
+
+            try {
+                // Cargar el documento template
+                const templateFile = templateFileInput.files[0];
+                const templateArrayBuffer = await templateFile.arrayBuffer();
+                const templateZip = await JSZip.loadAsync(templateArrayBuffer);
+
+                // Crear el documento final
+                const finalZip = new JSZip();
+
+                // Copiar todos los archivos del template
+                for (const fileName in templateZip.files) {
+                    if (!templateZip.files[fileName].dir) {
+                        const fileContent = await templateZip.files[fileName].async('uint8array');
+                        finalZip.file(fileName, fileContent);
+                    }
+                }
+
+                // Modificar el document.xml para insertar el contenido
+                const documentFile = 'word/document.xml';
+                if (finalZip.files[documentFile]) {
+                    let xmlContent = await finalZip.files[documentFile].async('string');
+
+                    // Generar el XML del contenido
+                    const contentXML = generateBingoContentXML(currentGame);
+
+                    // Insertar antes del cierre del body
+                    if (xmlContent.includes('</w:body>')) {
+                        xmlContent = xmlContent.replace('</w:body>', contentXML + '</w:body>');
+                    } else {
+                        xmlContent = xmlContent.replace('</w:document>', '<w:body>' + contentXML + '</w:body></w:document>');
+                    }
+
+                    finalZip.file(documentFile, xmlContent);
+                }
+
+                // Generar el blob final
+                const finalBlob = await finalZip.generateAsync({ type: 'blob' });
+                saveAs(finalBlob, `Bingo_${currentGame.name.replace(/\s+/g, '_')}_Template.docx`);
+                alert(`¡Documento generado para ${currentGame.students.length} estudiante(s)!`);
+            } catch (e) {
+                console.error(e);
+                alert('Error al generar (con template): ' + e.message);
+            }
+        }
+
+        function generateBingoContentXML(game) {
+            let contentXML = '';
+            // Tamaños de fuente ajustados (Solicitud: Tamaño 14 = 28 half-points)
+            const titleSize = "28"; // 14pt
+            const headerSize = "36"; // 18pt (BINGO header)
+
+            // Reducimos el tamaño de celda un poco más (1400 -> 1200)
+            const cellSize = 1200;
+            const headerCellSize = 1200;
+
+            game.students.forEach((student, index) => {
+                // Salto de página para el siguiente estudiante
+                if (index > 0) {
+                    contentXML += '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+                }
+
+                // 1. HEADER ELIMINADO (Solicitud usuario: No mostrar institución)
+                /*
+                if (game.institution) {
+                    contentXML += `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="100"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/><w:color w:val="888888"/></w:rPr><w:t>${escapeXml(game.institution.toUpperCase())}</w:t></w:r></w:p>`;
+                }
+                */
+
+                // NOMBRE DEL ESTUDIANTE (Tamaño 14pt, Negrita)
+                contentXML += `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="200" w:after="400"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="${titleSize}"/><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/></w:rPr><w:t>${escapeXml(student.name.toUpperCase())}</w:t></w:r></w:p>`;
+
+                // 2. TABLA DE BINGO (COMPACTA)
+                const borderXML = '<w:tblBorders><w:top w:val="single" w:sz="8" w:color="000000"/><w:left w:val="single" w:sz="8" w:color="000000"/><w:bottom w:val="single" w:sz="8" w:color="000000"/><w:right w:val="single" w:sz="8" w:color="000000"/><w:insideH w:val="single" w:sz="4" w:color="000000"/><w:insideV w:val="single" w:sz="4" w:color="000000"/></w:tblBorders>';
+
+                contentXML += `<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:jc w:val="center"/>${borderXML}</w:tblPr><w:tblGrid>`;
+
+                for (let i = 0; i < 5; i++) contentXML += `<w:gridCol w:w="${headerCellSize}"/>`;
+                contentXML += '</w:tblGrid>';
+
+                // Fila de Encabezado (B I N G O)
+                contentXML += `<w:tr><w:trPr><w:trHeight w:val="500" w:hRule="atLeast"/></w:trPr>`;
+                const bingoLetters = ['B', 'I', 'N', 'G', 'O'];
+                bingoLetters.forEach(letter => {
+                    contentXML += `<w:tc><w:tcPr><w:tcW w:w="${headerCellSize}" w:type="dxa"/><w:shd w:fill="000000" w:val="clear"/><w:vAlign w:val="center"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="60" w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="${headerSize}"/><w:color w:val="FFFFFF"/></w:rPr><w:t>${letter}</w:t></w:r></w:p></w:tc>`;
+                });
+                contentXML += '</w:tr>';
+
+                // Filas de datos (5x5)
+                for (let i = 0; i < 5; i++) {
+                    contentXML += `<w:tr><w:trPr><w:trHeight w:val="${cellSize}" w:hRule="atLeast"/></w:trPr>`;
+                    for (let j = 0; j < 5; j++) {
+                        const cellData = student.card[i * 5 + j];
+                        const val = (cellData !== undefined && cellData !== null) ? cellData.toString() : "";
+
+                        // Fuente Base 14pt (28), reduciendo si es muy largo
+                        let fontSize = 28;
+                        if (val.length > 5) fontSize = 24; // 12pt
+                        if (val.length > 8) fontSize = 20; // 10pt
+                        if (val.length > 12) fontSize = 16; // 8pt
+
+                        contentXML += `<w:tc><w:tcPr><w:tcW w:w="${cellSize}" w:type="dxa"/><w:vAlign w:val="center"/><w:shd w:fill="FFFFFF" w:val="clear"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="100" w:after="100"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="${fontSize}"/></w:rPr><w:t>${escapeXml(val)}</w:t></w:r></w:p></w:tc>`;
+                    }
+                    contentXML += '</w:tr>';
+                }
+                contentXML += '</w:tbl>';
+
+                // Espacio final
+                contentXML += '<w:p><w:pPr><w:spacing w:before="400"/></w:pPr></w:p>';
+            });
+
+            return contentXML;
+        }
+
+        function escapeXml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        function exportToWordFromScratch() {
+            if (!currentGame) return;
+            if (typeof docx === 'undefined') return alert("Error: Librería docx no cargada.");
+
+            try {
+                const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, AlignmentType, WidthType, BorderStyle, ShadingType, PageBreak } = docx;
+
+                // Estilo Compacto (Fuente 14)
+                const bingoTableBorders = {
+                    top: { style: BorderStyle.SINGLE, size: 8 },
+                    bottom: { style: BorderStyle.SINGLE, size: 8 },
+                    left: { style: BorderStyle.SINGLE, size: 8 },
+                    right: { style: BorderStyle.SINGLE, size: 8 },
+                    insideHorizontal: { style: BorderStyle.SINGLE, size: 4 },
+                    insideVertical: { style: BorderStyle.SINGLE, size: 4 },
+                };
+
+                const children = [];
+
+                currentGame.students.forEach((student, index) => {
+                    if (index > 0) children.push(new Paragraph({ children: [new PageBreak()] }));
+
+                    // HEADER ELIMINADO
+                    /*
+                    if (currentGame.institution) {
+                        children.push(new Paragraph({
+                            children: [new TextRun({ text: currentGame.institution.toUpperCase(), size: 20, font: "Arial", color: "888888" })],
+                            alignment: AlignmentType.CENTER,
+                            spacing: { after: 100 }
+                        }));
+                    }
+                    */
+
+                    // NOMBRE (Tamaño 14pt = 28 half-points)
+                    children.push(new Paragraph({
+                        children: [
+                            new TextRun({ text: student.name.toUpperCase(), bold: true, size: 28, font: "Arial" })
+                        ],
+                        alignment: AlignmentType.CENTER,
+                        spacing: { before: 200, after: 400 },
+                    }));
+
+                    // GRID
+                    const headerCells = ['B', 'I', 'N', 'G', 'O'].map(letter => new TableCell({
+                        children: [new Paragraph({
+                            children: [new TextRun({ text: letter, bold: true, size: 36, color: "FFFFFF", font: "Arial Black" })], // 18pt
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 60, after: 60 }
+                        })],
+                        shading: { fill: "000000", type: ShadingType.CLEAR, color: "auto" },
+                        verticalAlign: "center",
+                        borders: {
+                            top: { style: BorderStyle.SINGLE, size: 4, color: "FFFFFF" },
+                            bottom: { style: BorderStyle.SINGLE, size: 4, color: "FFFFFF" },
+                            left: { style: BorderStyle.SINGLE, size: 4, color: "FFFFFF" },
+                            right: { style: BorderStyle.SINGLE, size: 4, color: "FFFFFF" },
+                        }
+                    }));
+
+                    const rows = [new TableRow({ children: headerCells, height: { value: 500, rule: "atLeast" } })];
+
+                    for (let i = 0; i < 5; i++) {
+                        const cells = [];
+                        for (let j = 0; j < 5; j++) {
+                            const val = student.card[i * 5 + j].toString();
+
+                            // 14pt base (28), reduciendo si es necesario
+                            let fontSize = 28;
+                            if (val.length > 5) fontSize = 24;
+                            if (val.length > 8) fontSize = 20;
+                            if (val.length > 12) fontSize = 16;
+
+                            cells.push(new TableCell({
+                                children: [new Paragraph({
+                                    children: [new TextRun({ text: val, size: fontSize, font: "Segoe UI" })],
+                                    alignment: AlignmentType.CENTER,
+                                    spacing: { before: 100, after: 100 }
+                                })],
+                                verticalAlign: "center",
+                                height: { value: 1200, rule: "atLeast" }, // Más compacto (1200)
+                                shading: { fill: "FFFFFF" }
+                            }));
+                        }
+                        rows.push(new TableRow({ children: cells }));
+                    }
+
+                    children.push(new Table({
+                        rows: rows,
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        borders: bingoTableBorders,
+                        alignment: AlignmentType.CENTER
+                    }));
+
+                    children.push(new Paragraph({ text: "", spacing: { before: 400 } }));
+                });
+
+                const doc = new Document({ sections: [{ children: children }] });
+
+                Packer.toBlob(doc).then(blob => {
+                    saveAs(blob, `Bingo_Compacto_${currentGame.name.replace(/\s+/g, '_')}.docx`);
+                    alert("¡Documento Compacto (Fuente 14) generado!");
+                });
+
+            } catch (e) {
+                console.error(e);
+                alert("Error generando documento: " + e.message);
+            }
+        }
+
+        // Inicializar
+        renderGameList();
+    </script>
+
+</body>
+
+</html>
