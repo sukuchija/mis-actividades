@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador Batalla Naval en Q</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Librerías para templates Word -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <div style="position: absolute; top: 10px; left: 10px;">
+            <a href="../index.html"
+                style="text-decoration: none; padding: 8px 15px; background: rgba(255,255,255,0.2); color: white; border-radius: 5px; font-weight: bold; font-family: sans-serif; border: 1px solid rgba(255,255,255,0.5);">⬅
+                Volver</a>
+        </div>
+        <h1>⚓ Batalla Naval en Q: Generador de Torneo</h1>
+    </header>
+
+    <div class="container">
+
+        <div class="instructions-card">
+            <h2>Instrucciones para el Docente:</h2>
+            <ol>
+                <li>Pega la lista de estudiantes (uno por línea).</li>
+                <li>Haz clic en <strong>"Generar Tableros"</strong>.</li>
+                <li>Revisa la vista previa y haz clic en <strong>"Descargar para Word"</strong>.</li>
+                <li>Imprime y entrega. El plano incluye guías para decimales (0.5).</li>
+            </ol>
+        </div>
+
+        <div class="controls-section">
+            <div class="input-group">
+                <label for="templateFile" class="input-label">Documento Template:</label>
+                <p style="margin-bottom: 10px; color: #666; font-size: 0.9em;">Selecciona el documento template con el
+                    formato del colegio (50.30 FORMATO GUIA_VERTICAL.docx)</p>
+                <input type="file" id="templateFile" accept=".docx"
+                    style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                <div style="margin-bottom: 15px;">
+                    <span id="templateStatus"
+                        style="padding: 6px 12px; background: #f0f0f0; border-radius: 4px; font-size: 0.9em;">No se ha
+                        seleccionado template</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="studentList" class="input-label">Lista de Estudiantes:</label>
+                <textarea id="studentList"
+                    placeholder="Escribe los nombres aquí...&#10;Juan Pérez&#10;María Gómez&#10;Carlos Ruiz"></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button id="btnGenerate" class="btn-primary">
+                    <span>⚡ Generar Tableros</span>
+                </button>
+                <button id="btnDownload" class="btn-success">
+                    <span>📄 Descargar para Word</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="preview-area">
+            <!-- Cards will appear here -->
+        </div>
+
+        <footer>
+            Generador de Material Didáctico - Matemáticas 2026
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
